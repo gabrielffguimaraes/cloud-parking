@@ -18,11 +18,13 @@ public class Parking {
     private LocalDateTime entryDate;
     private LocalDateTime exitDate;
 
-    public Parking(String id, String license, String state, String model, String color) {
+    public Parking(String id, String license, String state, String model, String color, LocalDateTime entryDate) {
         this.id = id;
         this.license = license;
         this.state = state;
         this.model = model;
         this.color = color;
+        this.entryDate = entryDate;
     }
+
 }
