@@ -1,22 +1,14 @@
 package one.digitalinnovation.parking.controller;
 
-import io.swagger.v3.oas.annotations.OpenAPI30;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.Operation;
-import one.digitalinnovation.parking.model.Parking;
+import one.digitalinnovation.parking.model.dto.ExitCalTime;
 import one.digitalinnovation.parking.model.dto.ParkingCreateDTO;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
 import one.digitalinnovation.parking.service.ParkingService;
-import one.digitalinnovation.parking.service.impl.ParkingServiceImp;
-import org.springdoc.core.annotations.RouterOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/parking")
@@ -54,7 +46,7 @@ public class ParkingController {
     }
 
     @PatchMapping("{id}")
-    public void exit(@PathVariable String id) {
-        this.parkingService.exit(id);
+    public ResponseEntity<ExitCalTime> exit(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.parkingService.exit(id));
     }
 }

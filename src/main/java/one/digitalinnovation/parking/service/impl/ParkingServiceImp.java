@@ -2,9 +2,11 @@ package one.digitalinnovation.parking.service.impl;
 
 import one.digitalinnovation.parking.helpers.Helper;
 import one.digitalinnovation.parking.model.Parking;
+import one.digitalinnovation.parking.model.dto.ExitCalTime;
 import one.digitalinnovation.parking.model.dto.ParkingCreateDTO;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
 import one.digitalinnovation.parking.service.ParkingService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -12,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,13 +28,10 @@ public class ParkingServiceImp implements ParkingService {
 
     private  static Map<String, Parking> parkingDB = new LinkedHashMap<>();
 
-    static {
-        Parking parking1 = new Parking(getUUID(), "DMS-1111", "SC" , "CELTA" , "PRETO",LocalDateTime.now());
-        Parking parking2 = new Parking(getUUID(), "GPS-5454S", "RJ" , "FORD FIESTA" , "BRANCO",LocalDateTime.now());
-
-        parkingDB.put(parking1.getId(),parking1);
-        parkingDB.put(parking2.getId(),parking2);
-    }
+    @Value("${messages.parking-not-found}")
+    private String parkingNotFound;
+    @Value("${messages.operation-already-done}")
+    private String operationAlreadyDone;
 
     private static String getUUID() {
         return UUID.randomUUID().toString().replace("-","");
@@ -48,7 +48,7 @@ public class ParkingServiceImp implements ParkingService {
     public ParkingDTO findById(String id) {
         Parking parking = parkingDB.get(id);
         if(parking == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Parking não encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,parkingNotFound);
         }
 
         System.out.println(parking.toString());
@@ -67,7 +67,7 @@ public class ParkingServiceImp implements ParkingService {
     @Override
     public void deleteById(String id) {
         if(findById(id) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Parking não encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,parkingNotFound);
         }
         parkingDB.remove(id);
     }
@@ -75,7 +75,7 @@ public class ParkingServiceImp implements ParkingService {
     public ParkingDTO update(ParkingCreateDTO parkingDTO,String id) {
         Parking parking = parkingDB.get(id);
         if(parking == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Parking não encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,parkingNotFound);
         }
         parking = helper.map(parkingDTO,Parking.class);
         parking.setId(id);
@@ -87,7 +87,7 @@ public class ParkingServiceImp implements ParkingService {
     public ParkingDTO patch(Map<Object,Object> objectMap,String id) {
         Parking parking = parkingDB.get(id);
         if(parking == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Parking não encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,parkingNotFound);
         }
         objectMap.forEach((key , value) -> {
             if(ReflectionUtils.findField(ParkingDTO.class,(String) key) != null) {
@@ -101,8 +101,32 @@ public class ParkingServiceImp implements ParkingService {
         return helper.map(parking,ParkingDTO.class);
     }
 
-    public void exit(String id) {
+    public ExitCalTime exit(String id) {
         Map<Object, Object> partialParking = new HashMap<>(){{put("exitDate",LocalDateTime.now());}};
+        Parking parking = parkingDB.get(id);
+        if(parking == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,parkingNotFound);
+        }
+        if(parking.getExitDate() != null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,operationAlreadyDone);
+        }
+        parking.getEntryDate().compareTo(LocalDateTime.now());
+        Long min = ChronoUnit.MINUTES.between(parking.getEntryDate(),LocalDateTime.now());
+        Number amount = 0;
+        if(min >= 15) {
+            amount = 0;
+        }
+        if(min >= 60) {
+            amount = 5;
+        }
+        if(min >= 120) {
+            amount = 8;
+        }
+        if (min > 180) {
+            amount = 20;
+        }
         patch(partialParking,id);
+        String minutes = Helper.minutesToHoursMinutes(min);
+        return new ExitCalTime(minutes,amount);
     }
 }

@@ -1,6 +1,7 @@
 package one.digitalinnovation.parking.service;
 
 import one.digitalinnovation.parking.model.Parking;
+import one.digitalinnovation.parking.model.dto.ExitCalTime;
 import one.digitalinnovation.parking.model.dto.ParkingCreateDTO;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
 
@@ -24,5 +25,5 @@ public interface ParkingService {
 
     ParkingDTO patch(Map<Object,Object> objectMap,String id);
 
-    void exit(String id);
+    ExitCalTime exit(String id);
 }

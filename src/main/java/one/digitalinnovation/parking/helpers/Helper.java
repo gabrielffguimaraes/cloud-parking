@@ -36,4 +36,9 @@ public class Helper {
         return modelMapper.map(element, targetClass);
     }
 
+    public static String minutesToHoursMinutes(Long minutes) {
+        int hrs = (int) (minutes / 60) ;
+        int min = (int) (minutes % 60) ;
+        return String.format("%02d:%02d",hrs,min);
+    }
 }
