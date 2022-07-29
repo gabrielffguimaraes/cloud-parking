@@ -12,9 +12,11 @@ import org.springdoc.core.annotations.RouterOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/parking")
@@ -35,8 +37,24 @@ public class ParkingController {
         return ResponseEntity.status(HttpStatus.OK).body(this.parkingService.findById(id));
     }
 
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String id) {
+        this.parkingService.deleteById(id);
+    }
+
     @PostMapping
     public ResponseEntity<ParkingDTO> create(@RequestBody ParkingCreateDTO parkingDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.parkingService.create(parkingDTO));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<ParkingDTO> update(@RequestBody ParkingCreateDTO parkingDTO,@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.parkingService.update(parkingDTO,id));
+    }
+
+    @PatchMapping("{id}")
+    public void exit(@PathVariable String id) {
+        this.parkingService.exit(id);
     }
 }
