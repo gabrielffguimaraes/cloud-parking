@@ -4,9 +4,11 @@ import one.digitalinnovation.parking.model.Parking;
 import one.digitalinnovation.parking.model.dto.ExitCalTime;
 import one.digitalinnovation.parking.model.dto.ParkingCreateDTO;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
+import one.digitalinnovation.parking.model.entity.ParkingEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface ParkingService {
     static String getUUID() {
@@ -15,7 +17,7 @@ public interface ParkingService {
 
     List<ParkingDTO> findAll();
 
-    ParkingDTO findById(String id);
+    ParkingEntity findById(String id);
 
     ParkingDTO create(ParkingCreateDTO parkingDTO);
 

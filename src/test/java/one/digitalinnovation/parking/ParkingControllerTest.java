@@ -29,6 +29,7 @@ public class ParkingControllerTest {
         parkingDTO.setLicense("GPS-5454S");
         parkingDTO.setModel("FIESTA SEDAN 2015");
         parkingDTO.setState("RJ");
+
         RestAssured.given()
                 .when()
                 .body(parkingDTO)
@@ -47,7 +48,7 @@ public class ParkingControllerTest {
                 .get("/parking")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                //.body("license[0]", Matchers.equalTo("GPS-5454S"))
+                //.body("license[0]", Matchers.equalTo("WWW-GSCADE"))
                 .extract().response().body().prettyPrint();
     }
 

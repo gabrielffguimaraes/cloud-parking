@@ -26,7 +26,6 @@ public class Helper {
     }
 
     public  <S,T> List<S> mapList(List<T> elementList, Class<S> targetClass) {
-
         return elementList
                 .stream()
                 .map(element -> modelMapper.map(element, targetClass))

@@ -1,8 +1,10 @@
 package one.digitalinnovation.parking.controller;
 
+import one.digitalinnovation.parking.helpers.Helper;
 import one.digitalinnovation.parking.model.dto.ExitCalTime;
 import one.digitalinnovation.parking.model.dto.ParkingCreateDTO;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
+import one.digitalinnovation.parking.model.entity.ParkingEntity;
 import one.digitalinnovation.parking.service.ParkingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/parking")
 public class ParkingController {
+    private final Helper helper;
     private final ParkingService parkingService;
 
-    public ParkingController(ParkingService parkingService) {
+    public ParkingController(Helper helper, ParkingService parkingService) {
+        this.helper = helper;
         this.parkingService = parkingService;
     }
 
@@ -26,7 +30,9 @@ public class ParkingController {
 
     @GetMapping("{id}")
     public ResponseEntity<ParkingDTO> findById(@PathVariable String id) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.parkingService.findById(id));
+        ParkingEntity parkingEntity = this.parkingService.findById(id);
+        ParkingDTO result = helper.map(parkingEntity,ParkingDTO.class);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @DeleteMapping("{id}")
