@@ -7,3 +7,4 @@
 <h3>Implementações</h3>
 
 <li>Endpoint de /exit patch de atualização de saida do carro, retorna valor e tempo gasto. </li>
+<li>Utilizaão do mysql no banco de dados</li>
