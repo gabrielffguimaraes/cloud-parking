@@ -1,32 +1,34 @@
 package one.digitalinnovation.parking.service.impl;
 
 import one.digitalinnovation.parking.helpers.Helper;
-import one.digitalinnovation.parking.model.Parking;
-import one.digitalinnovation.parking.model.dto.ExitCalTime;
 import one.digitalinnovation.parking.model.dto.ParkingCreateDTO;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
 import one.digitalinnovation.parking.model.entity.ParkingEntity;
 import one.digitalinnovation.parking.repository.ParkingRepository;
 import one.digitalinnovation.parking.service.ParkingService;
+import one.digitalinnovation.parking.service.ParkingServiceCheckout;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+
+import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
 public class ParkingServiceImp implements ParkingService {
     private final ParkingRepository parkingRepository;
+    private final ParkingServiceCheckout parkingServiceCheckout;
     private final Helper helper;
-    public ParkingServiceImp(ParkingRepository parkingRepository, Helper helper) {
+    public ParkingServiceImp(ParkingRepository parkingRepository, ParkingServiceCheckout parkingServiceCheckout, Helper helper) {
         this.parkingRepository = parkingRepository;
+        this.parkingServiceCheckout = parkingServiceCheckout;
         this.helper = helper;
     }
     @Value("${messages.parking-not-found}")
@@ -37,6 +39,7 @@ public class ParkingServiceImp implements ParkingService {
     private String idInvalido;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParkingDTO> findAll() {
         List<ParkingEntity> parkingList = parkingRepository.findAll();
         List<ParkingDTO> result = helper.mapList(parkingList,ParkingDTO.class);
@@ -45,6 +48,7 @@ public class ParkingServiceImp implements ParkingService {
 
 
     @Override
+    @Transactional(readOnly = true,propagation = Propagation.SUPPORTS)
     public ParkingEntity findById(String id) {
         UUID uuid;
         try {
@@ -57,6 +61,7 @@ public class ParkingServiceImp implements ParkingService {
         return parking;
     }
     @Override
+    @Transactional
     public ParkingDTO create(ParkingCreateDTO parkingCreate) {
         ParkingEntity parking = helper.map(parkingCreate,ParkingEntity.class);
         parkingRepository.save(parking);
@@ -64,11 +69,13 @@ public class ParkingServiceImp implements ParkingService {
     }
 
     @Override
+    @Transactional
     public void deleteById(String id) {
         ParkingEntity parkingEntity = findById(id);
         parkingRepository.delete(parkingEntity);
     }
     @Override
+    @Transactional
     public ParkingDTO update(ParkingCreateDTO p,String id) {
         ParkingEntity parking = findById(id);
         parking.setColor(p.getColor());
@@ -79,6 +86,7 @@ public class ParkingServiceImp implements ParkingService {
         return helper.map(parking,ParkingDTO.class);
     }
     @Override
+    @Transactional
     public ParkingDTO patch(Map<Object,Object> objectMap,String id) {
         ParkingEntity parking = findById(id);
         objectMap.forEach((key , value) -> {
@@ -91,30 +99,19 @@ public class ParkingServiceImp implements ParkingService {
         parkingRepository.save(parking);
         return helper.map(parking,ParkingDTO.class);
     }
-
-    public ExitCalTime exit(String id) {
+    @Transactional
+    public ParkingDTO exit(String id) {
         ParkingEntity parking = findById(id);
         if(parking.getExitDate() != null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,operationAlreadyDone);
         }
-        parking.getEntryDate().compareTo(LocalDateTime.now());
-        Long min = ChronoUnit.MINUTES.between(parking.getEntryDate(),LocalDateTime.now());
-        Number amount = 0;
-        if(min >= 15) {
-            amount = 0;
-        }
-        if(min >= 60) {
-            amount = 5;
-        }
-        if(min >= 120) {
-            amount = 8;
-        }
-        if (min > 180) {
-            amount = 20;
-        }
-        Map<Object, Object> partialParking = new HashMap<>(){{put("exitDate",LocalDateTime.now());}};
-        patch(partialParking,id);
-        String minutes = Helper.minutesToHoursMinutes(min);
-        return new ExitCalTime(minutes,amount);
+        parking.setExitDate(LocalDateTime.now());
+        double bill = parkingServiceCheckout.getBill(parking);
+
+        Map<Object, Object> partialParking = new HashMap<>(){{
+            put("exitDate",LocalDateTime.now());
+            put("bill",bill);
+        }};
+        return patch(partialParking,id);
     }
 }

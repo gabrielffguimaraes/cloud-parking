@@ -25,6 +25,8 @@ public class ParkingEntity {
     private LocalDateTime entryDate;
     @Column(name = "deixado_em")
     private LocalDateTime exitDate;
+    @Column(name = "valor_a_pagar")
+    private Double bill;
 
     @PrePersist
     private void prePersist() {

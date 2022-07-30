@@ -1,7 +1,6 @@
 package one.digitalinnovation.parking.controller;
 
 import one.digitalinnovation.parking.helpers.Helper;
-import one.digitalinnovation.parking.model.dto.ExitCalTime;
 import one.digitalinnovation.parking.model.dto.ParkingCreateDTO;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
 import one.digitalinnovation.parking.model.entity.ParkingEntity;
@@ -52,7 +51,7 @@ public class ParkingController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<ExitCalTime> exit(@PathVariable String id) {
+    public ResponseEntity<ParkingDTO> exit(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.OK).body(this.parkingService.exit(id));
     }
 }

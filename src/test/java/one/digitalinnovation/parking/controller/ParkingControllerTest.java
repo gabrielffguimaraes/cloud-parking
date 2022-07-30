@@ -1,4 +1,4 @@
-package one.digitalinnovation.parking;
+package one.digitalinnovation.parking.controller;
 
 import io.restassured.RestAssured;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import java.awt.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ParkingControllerTest {
+public class ParkingControllerTest extends AbstractContainerBase {
     @LocalServerPort
     private int randomPort;
 
