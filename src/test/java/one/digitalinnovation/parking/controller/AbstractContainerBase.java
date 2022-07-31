@@ -12,5 +12,6 @@ public abstract class AbstractContainerBase {
         System.setProperty("spring.datasource.username",MY_SQL_CONTAINER.getUsername());
         System.setProperty("spring.datasource.password",MY_SQL_CONTAINER.getPassword());
         System.setProperty("spring.jpa.hibernate.ddl-auto","update");
+
     }
 }
