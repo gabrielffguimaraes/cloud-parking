@@ -1,14 +1,17 @@
 package one.digitalinnovation.parking.controller;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import one.digitalinnovation.parking.model.dto.ParkingDTO;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 
 
 import java.awt.*;
@@ -31,9 +34,11 @@ public class ParkingControllerTest extends AbstractContainerBase {
         parkingDTO.setState("RJ");
 
         RestAssured.given()
-                .when()
+                .auth().preemptive().basic("user","123")
+                .contentType(ContentType.JSON)
+                .header("Authorization","Basic dXNlcjoxMjM=")
                 .body(parkingDTO)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .when()
                 .post("/parking")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
@@ -45,6 +50,8 @@ public class ParkingControllerTest extends AbstractContainerBase {
     void whenFindAllThenCheckResult() {
         RestAssured.given()
                 .when()
+                .auth()
+                .basic("user","123")
                 .get("/parking")
                 .then()
                 .statusCode(HttpStatus.OK.value())
